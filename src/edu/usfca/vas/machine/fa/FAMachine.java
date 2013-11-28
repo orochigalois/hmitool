@@ -290,6 +290,16 @@ public class FAMachine implements XJXMLSerializable {
     }
 
     // *** Debug methods
+    public String getCurrentState()
+    {
+    	String a=stateSet.toArray()[0].toString();
+    	return a;
+
+    }
+    public String getStartState()
+    {
+    	return states.getStartState();
+    }
 
     public void debugReset(String s) {
         reset();

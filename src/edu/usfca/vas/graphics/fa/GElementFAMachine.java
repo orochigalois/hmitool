@@ -264,6 +264,14 @@ public class GElementFAMachine extends GElement implements XJXMLSerializable {
     }
 
     // *** Debug methods
+    public String getStartState()
+    {
+    	return machine.getStartState();
+    }
+    public String getCurrentState()
+    {
+    	return machine.getCurrentState();
+    }
 
     public void debugReset(String s) {
         String r = check(s);

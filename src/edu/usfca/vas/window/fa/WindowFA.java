@@ -41,6 +41,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import com.alex.ViewPanel;
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperAbstract;
 import edu.usfca.vas.data.DataWrapperFA;
@@ -275,10 +276,16 @@ public class WindowFA extends WindowAbstract {
         getDebugger().reset();
         displayDebuggerInfo();
         updateExecutionComponents();
+        String start=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getStartState();
+        vp.updateImage(start);
+        vp.setV(true);
     }
 
     public boolean debugStepForward() {
         getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForward();
+        
+        String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
+        vp.updateImage(current);
         displayDebuggerInfo();
         updateExecutionComponents();
         return getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().isPaused();

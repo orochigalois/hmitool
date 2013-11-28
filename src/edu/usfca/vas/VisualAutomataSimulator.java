@@ -110,11 +110,13 @@ public class VisualAutomataSimulator extends XJApplicationDelegate {
                 break;
         }
 
-//        SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//                checkForUpdates(true);
-//            }
-//        });
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                checkForUpdates(true);
+                
+                
+            }
+        });
     }
 
     public static void checkForUpdates(boolean automatic) {
