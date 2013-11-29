@@ -31,17 +31,30 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.usfca.vas.window.fa;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
-import com.alex.ViewPanel;
+
+
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperAbstract;
 import edu.usfca.vas.data.DataWrapperFA;
@@ -66,6 +79,104 @@ public class WindowFA extends WindowAbstract {
 
     private JTabbedPane tabbedComponent;
     private XJMenu menuTools;
+    public ViewPanel vp=new ViewPanel();
+    public class ViewPanel extends JFrame {
+
+    	private JLabel lblImg;
+    	private Icon icon;
+
+    	/** Constructor to set up the GUI */
+    	public ViewPanel() {
+    		// Set up a panel for the buttons
+
+    		JPanel btnPanel = new JPanel(new FlowLayout());
+    		
+    		JButton btnLeft = new JButton("1");
+    		btnPanel.add(btnLeft);
+    		btnLeft.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+
+    				getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForwardByClick("1");
+    				String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
+    		        vp.updateImage(current);
+    		        displayDebuggerInfo();
+    		        updateExecutionComponents();
+    		        
+    				requestFocus(); // change the focus to JFrame to receive
+    								// KeyEvent
+    			}
+    		});
+    		
+    		JButton btnRight = new JButton("2");
+    		btnPanel.add(btnRight);
+    		btnRight.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+
+    				getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForwardByClick("2");
+    				String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
+    		        vp.updateImage(current);
+    		        displayDebuggerInfo();
+    		        updateExecutionComponents();
+    		        
+    				requestFocus(); // change the focus to JFrame to receive
+    								// KeyEvent
+    			}
+    		});
+
+    		
+    		lblImg = new JLabel();
+
+    		// Add both panels to this JFrame
+    		Container cp = getContentPane();
+    		cp.setLayout(new BorderLayout());
+    		cp.add(lblImg, BorderLayout.CENTER);
+    		cp.add(btnPanel, BorderLayout.SOUTH);
+    		icon = new ImageIcon("D://131025HMI_tool//workspace//demo//t1.png");
+
+    		lblImg.setIcon(icon);
+    		// "this" JFrame fires KeyEvent
+    		addKeyListener(new KeyAdapter() {
+    			@Override
+    			public void keyPressed(KeyEvent evt) {
+    				switch (evt.getKeyCode()) {
+    				case KeyEvent.VK_LEFT:
+
+    					icon = new ImageIcon(
+    							"D://131025HMI_tool//workspace//demo//t1.png");
+
+    					lblImg.setIcon(icon);
+    					break;
+    				case KeyEvent.VK_RIGHT:
+
+    					icon = new ImageIcon(
+    							"D://131025HMI_tool//workspace//demo//t2.png");
+
+    					lblImg.setIcon(icon);
+    					break;
+    				}
+    			}
+    		});
+
+    		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Handle the CLOSE
+    														// button
+    		setTitle("ViewPanel");
+    		pack(); // pack all the components in the JFrame
+    		setVisible(false); // show it
+    		requestFocus(); // set the focus to JFrame to receive KeyEvent
+    	}
+
+    	public void setV(boolean V)
+    	{
+    		setVisible(V);
+    	}
+    	public void updateImage(String imgName)
+    	{
+    		icon = new ImageIcon(
+    				"D://131025HMI_tool//workspace//hmitool//"+imgName+".png");
+
+    		lblImg.setIcon(icon);
+    	}
+    }
 
     public void awakeConcrete() {
         tabbedComponent = new JTabbedPane();

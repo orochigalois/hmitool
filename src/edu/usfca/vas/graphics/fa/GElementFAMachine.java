@@ -282,6 +282,13 @@ public class GElementFAMachine extends GElement implements XJXMLSerializable {
         machine.debugReset(r);
     }
 
+    public void debugStepForwardByClick(String s) {
+        if(machine.debugStepForwardByClick(s))
+            state = STATE_PAUSED;
+        else
+            state = STATE_STOPPED;
+    }
+    
     public void debugStepForward() {
         if(machine.debugStepForward())
             state = STATE_PAUSED;

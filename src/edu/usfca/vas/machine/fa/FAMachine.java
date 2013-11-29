@@ -305,6 +305,21 @@ public class FAMachine implements XJXMLSerializable {
         reset();
         debugString = s;
     }
+    
+    public boolean debugStepForwardByClick(String s) {
+
+
+        if(stateSet.isEmpty())
+            stateSet = getStartStates();
+
+        transitions.getLastTransitionSet().clear();
+
+        put(s.charAt(0));
+
+        return true;
+    }
+    
+    
 
     public boolean debugStepForward() {
         if(debugString.length() == 0)

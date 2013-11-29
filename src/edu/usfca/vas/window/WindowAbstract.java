@@ -53,7 +53,6 @@ import edu.usfca.xj.foundation.XJUtils;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import com.alex.ViewPanel;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -119,7 +118,7 @@ public abstract class WindowAbstract extends XJWindow implements XJMenuItemDeleg
     protected List windowMachines = new ArrayList();
     protected int currentWindowMachineIndex = 0;
     
-    public ViewPanel vp=new ViewPanel();
+    
 
     public WindowAbstract() {
         setSize(1000, 700);
