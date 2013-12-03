@@ -42,9 +42,16 @@ import edu.usfca.xj.appkit.menu.XJMenuItem;
 import edu.usfca.xj.appkit.utils.XJAlert;
 
 import javax.swing.*;
-import java.awt.*;
 
-public class GViewFAMachine extends GView {
+import java.awt.*;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+
+public class GViewFAMachine extends GView implements DropTargetListener {
 
     // ** Menu items
 
@@ -58,9 +65,12 @@ public class GViewFAMachine extends GView {
 
     protected DesignToolsFA designToolFA = null;
     protected XJFrame parent;
+    
+    DropTarget dt;
 
     public GViewFAMachine(XJFrame parent) {
         this.parent = parent;
+        dt = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
     public int defaultLinkShape() {
@@ -112,6 +122,18 @@ public class GViewFAMachine extends GView {
     public void createStateAtXY(double x, double y) {
         String s = (String)JOptionPane.showInputDialog(null, Localized.getString("faNewStateMessage"), Localized.getString("faNewStateTitle"),
                 JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if(s != null) {
+            if(getMachine().getMachine().containsStateName(s))
+                XJAlert.display(parent.getJavaContainer(), Localized.getString("faNewStateTitle"), Localized.getString("faNewStateAlreadyExists"));
+            else {
+                getMachine().addStateAtXY(s, x, y);
+                changeDone();
+                repaint();
+            }
+        }
+    }
+    public void createStateAtXYByDragDrop(String s,double x, double y) {
+
         if(s != null) {
             if(getMachine().getMachine().containsStateName(s))
                 XJAlert.display(parent.getJavaContainer(), Localized.getString("faNewStateTitle"), Localized.getString("faNewStateAlreadyExists"));
@@ -225,5 +247,38 @@ public class GViewFAMachine extends GView {
             editState((GElementFAState)e);
         }
     }
+
+	@Override
+	public void dragEnter(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragExit(DropTargetEvent dte) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragOver(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+		
+	}
+
+	@Override
+	public void drop(DropTargetDropEvent dtde) {
+		// TODO Auto-generated method stub
+		
+		createStateAtXYByDragDrop(Constant.s,dtde.getLocation().x, dtde.getLocation().y);
+		
+	}
+
+	@Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -34,12 +34,18 @@ package edu.usfca.vas.window.fa;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -52,6 +58,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+
+
+
+
+
+
 
 
 
@@ -80,6 +92,27 @@ public class WindowFA extends WindowAbstract {
     private JTabbedPane tabbedComponent;
     private XJMenu menuTools;
     public ViewPanel vp=new ViewPanel();
+    
+    public class JBackgroundPanel extends JPanel {
+    	  private BufferedImage img;
+    	 
+    	  public JBackgroundPanel() {
+    	    // load the background image
+    	    try {
+    	      img = ImageIO.read(new File("./bg.png"));
+    	    } catch(IOException e) {
+    	      e.printStackTrace();
+    	    }
+    	  }
+    	 
+    	  @Override
+    	  protected void paintComponent(Graphics g) {
+    	    super.paintComponent(g);
+    	    // paint the background image and scale it to fill the entire space
+    	    g.drawImage(img, 0, 0, 876, 328, this);
+    	  }
+    	}
+    
     public class ViewPanel extends JFrame {
 
     	private JLabel lblImg;
@@ -88,7 +121,7 @@ public class WindowFA extends WindowAbstract {
     	/** Constructor to set up the GUI */
     	public ViewPanel() {
     		// Set up a panel for the buttons
-
+    		JBackgroundPanel bgPanel = new JBackgroundPanel();
     		JPanel btnPanel = new JPanel(new FlowLayout());
     		
     		JButton btnLeft = new JButton("1");
@@ -125,15 +158,19 @@ public class WindowFA extends WindowAbstract {
 
     		
     		lblImg = new JLabel();
-
+    		icon = new ImageIcon("trip1.png");
     		// Add both panels to this JFrame
     		Container cp = getContentPane();
     		cp.setLayout(new BorderLayout());
-    		cp.add(lblImg, BorderLayout.CENTER);
+    		
+    		bgPanel.add(lblImg);
+    		cp.add(bgPanel, BorderLayout.CENTER);
     		cp.add(btnPanel, BorderLayout.SOUTH);
-    		icon = new ImageIcon("D://131025HMI_tool//workspace//demo//t1.png");
-
+    		
+    		bgPanel.setLayout(null);
     		lblImg.setIcon(icon);
+//    		lblImg.setLocation(27, 20);
+    		lblImg.setBounds(386, 75, 101, 121);
     		// "this" JFrame fires KeyEvent
     		addKeyListener(new KeyAdapter() {
     			@Override
@@ -160,6 +197,13 @@ public class WindowFA extends WindowAbstract {
     		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Handle the CLOSE
     														// button
     		setTitle("ViewPanel");
+    		
+    		Dimension d = new Dimension(876,390);
+            setPreferredSize(d);
+            setResizable(false);
+        
+            
+            
     		pack(); // pack all the components in the JFrame
     		setVisible(false); // show it
     		requestFocus(); // set the focus to JFrame to receive KeyEvent

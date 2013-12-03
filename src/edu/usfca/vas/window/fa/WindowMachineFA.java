@@ -27,13 +27,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 package edu.usfca.vas.window.fa;
 
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperFA;
 import edu.usfca.vas.graphics.fa.GViewFAMachine;
+
+import edu.usfca.vas.graphics.fa.*;
 import edu.usfca.vas.machine.fa.FAMachine;
 import edu.usfca.vas.window.WindowMachineAbstract;
 import edu.usfca.vas.window.tools.DesignToolsFA;
@@ -42,253 +44,375 @@ import edu.usfca.xj.appkit.frame.XJFrame;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureEvent;
+import java.awt.dnd.DragGestureListener;
+import java.awt.dnd.DragGestureRecognizer;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceDragEvent;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DragSourceEvent;
+import java.awt.dnd.DragSourceListener;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class WindowMachineFA extends WindowMachineAbstract {
+public class WindowMachineFA extends WindowMachineAbstract implements DragSourceListener,
+DragGestureListener{
 
-    protected WindowMachineFASettings settings = null;
+	protected WindowMachineFASettings settings = null;
 
-    protected JTextField alphabetTextField;
-    protected JTextField stringTextField;
-    protected JComboBox typeComboBox;
-    protected JPanel mainPanel;
-    protected JSplitPane mainPanelSplit;
-    protected JScrollPane mainPanelScrollPane;
+	protected JTextField alphabetTextField;
+	protected JTextField stringTextField;
+	protected JComboBox typeComboBox;
+	protected JPanel mainPanel;
+	protected JSplitPane mainPanelSplit;
+	protected JScrollPane mainPanelScrollPane;
 
-    protected DesignToolsFA designToolFA;
+	protected DesignToolsFA designToolFA;
 
-    protected WindowMachineFAOverlay overlay;
-    protected boolean overlayVisible;
+	protected WindowMachineFAOverlay overlay;
+	protected boolean overlayVisible;
 
-    public WindowMachineFA(XJFrame parent) {
-        super(parent);
-    }
+	protected JComboBox eventComboBox;
+	
+	DragSource ds;
 
-    public void init() {
-        setGraphicPanel(new GViewFAMachine(parent));
-        getFAGraphicPanel().setDelegate(this);
-        getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
-        getFAGraphicPanel().setRealSize(getDataWrapperFA().getSize());
+	StringSelection transferable;
+	JList sampleJList;
 
-        setLayout(new BorderLayout());
+	public WindowMachineFA(XJFrame parent) {
+		super(parent);
+	}
 
-        add(createUpperPanel(), BorderLayout.NORTH);
-        add(createAutomataPanel(), BorderLayout.CENTER);
+	public void init() {
+		setGraphicPanel(new GViewFAMachine(parent));
+		getFAGraphicPanel().setDelegate(this);
+		getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
+		getFAGraphicPanel().setRealSize(getDataWrapperFA().getSize());
 
-        overlay = new WindowMachineFAOverlay(parent.getJFrame(), mainPanel);
-        overlay.setStringField(stringTextField);
-    }
+		setLayout(new BorderLayout());
 
-    public WindowFA getWindowFA() {
-        return (WindowFA)getWindow();
-    }
+		add(createUpperPanel(), BorderLayout.NORTH);
+		add(createAutomataPanel(), BorderLayout.CENTER);
+		add(createLeftPanel(), BorderLayout.WEST);
 
-    public DataWrapperFA getDataWrapperFA() {
-        return (DataWrapperFA)getDataWrapper();
-    }
+		overlay = new WindowMachineFAOverlay(parent.getJFrame(), mainPanel);
+		overlay.setStringField(stringTextField);
+	}
 
-    public GViewFAMachine getFAGraphicPanel() {
-        return (GViewFAMachine)getGraphicPanel();
-    }
+	public JPanel createLeftPanel() {
+		JPanel panel = new JPanel();
+		panel.setMaximumSize(panel.getPreferredSize());
+		panel.setMinimumSize(new Dimension(800, 800));
 
-    public JPanel createUpperPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setMaximumSize(new Dimension(99999, 30));
+		JavaLocationCollection collection = new JavaLocationCollection();
+		JavaLocationListModel listModel = new JavaLocationListModel(collection);
+		sampleJList = new JList(listModel);
+		sampleJList.setCellRenderer(new JavaLocationRenderer());
+		Font displayFont = new Font("Serif", Font.BOLD, 18);
+		sampleJList.setFont(displayFont);
+		
+	
+	
 
-        panel.add(designToolFA = new DesignToolsFA(), BorderLayout.WEST);
-        panel.add(createControlPanel(), BorderLayout.EAST);
+		ds = new DragSource();
+		DragGestureRecognizer dgr = ds.createDefaultDragGestureRecognizer(sampleJList,
+				DnDConstants.ACTION_COPY, this);
+		
 
-        getFAGraphicPanel().setDesignToolsPanel(designToolFA);
+//		sampleJList.setDropMode(DropMode.INSERT);
+//		sampleJList.setDragEnabled(true);
+		//sampleJList.setTransferHandler(handler);
 
-        return panel;
-    }
 
-    public JPanel createControlPanel() {
-        JPanel panel = new JPanel();
-        panel.setMaximumSize(new Dimension(99999, 30));
+		
+		JScrollPane scrollPane = new JScrollPane(sampleJList,
+	            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+	            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        panel.add(new JLabel(Localized.getString("faWMAutomaton")));
-        typeComboBox = new JComboBox(new String[] { Localized.getString("DFA"),
-                                                    Localized.getString("NFA") });
-        typeComboBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int type = typeComboBox.getSelectedIndex();
-                if(type !=getDataWrapperFA().getMachineType()) {
-                    getDataWrapperFA().setMachineType(type);
-                    changeOccured();
-                }
-            }
-        });
+		panel.setLayout(new BorderLayout());
 
-        panel.add(typeComboBox);
+		panel.add(scrollPane, BorderLayout.CENTER);
 
-        panel.add(new JLabel(Localized.getString("faWMAlphabet")));
+		return panel;
 
-        alphabetTextField = new JTextField(getDataWrapperFA().getSymbolsString());
-        alphabetTextField.setPreferredSize(new Dimension(100, 20));
-        alphabetTextField.addCaretListener(new CaretListener() {
-            public void caretUpdate(CaretEvent e) {
-                handleAlphabetTextFieldEvent();
-            }
+	}
 
-        });
+	public WindowFA getWindowFA() {
+		return (WindowFA) getWindow();
+	}
 
-        alphabetTextField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleAlphabetTextFieldEvent();
-            }
-        });
+	public DataWrapperFA getDataWrapperFA() {
+		return (DataWrapperFA) getDataWrapper();
+	}
 
-        panel.add(alphabetTextField);
+	public GViewFAMachine getFAGraphicPanel() {
+		return (GViewFAMachine) getGraphicPanel();
+	}
 
-        panel.add(new JLabel(Localized.getString("faWMString")));
+	public JPanel createUpperPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setMaximumSize(new Dimension(99999, 30));
 
-        stringTextField = new JTextField("");
-        stringTextField.setPreferredSize(new Dimension(100, 20));
-        stringTextField.addCaretListener(new CaretListener() {
-            public void caretUpdate(CaretEvent e) {
-                handleStringTextFieldEvent();
-            }
+		panel.add(designToolFA = new DesignToolsFA(), BorderLayout.WEST);
+		panel.add(createControlPanel(), BorderLayout.EAST);
 
-        });
+		getFAGraphicPanel().setDesignToolsPanel(designToolFA);
 
-        stringTextField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleStringTextFieldEvent();
-            }
-        });
+		return panel;
+	}
 
-        panel.add(stringTextField);
+	public JPanel createControlPanel() {
+		JPanel panel = new JPanel();
+		panel.setMaximumSize(new Dimension(99999, 30));
 
-        JButton start = new JButton(Localized.getString("faWMRun"));
-        start.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                getWindowFA().run();
-            }
-        });
+		panel.add(new JLabel(Localized.getString("faWMAutomaton")));
+		typeComboBox = new JComboBox(new String[] { Localized.getString("DFA"),
+				Localized.getString("NFA") });
+		typeComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int type = typeComboBox.getSelectedIndex();
+				if (type != getDataWrapperFA().getMachineType()) {
+					getDataWrapperFA().setMachineType(type);
+					changeOccured();
+				}
+			}
+		});
 
-        panel.add(start);
+		panel.add(typeComboBox);
 
-        return panel;
-    }
+		panel.add(new JLabel("event"));
+		eventComboBox = new JComboBox(new String[] { "e1", "e2" });
+		eventComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int type = eventComboBox.getSelectedIndex();
+				if (type != getDataWrapperFA().getMachineType()) {
+					getDataWrapperFA().setMachineType(type);
+					changeOccured();
+				}
+			}
+		});
 
-    public JComponent createAutomataPanel() {
-        mainPanelScrollPane = new JScrollPane(getGraphicPanel());
-        mainPanelScrollPane.setPreferredSize(new Dimension(640, 480));
-        mainPanelScrollPane.setWheelScrollingEnabled(true);
+		panel.add(eventComboBox);
 
-        mainPanelSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        mainPanelSplit.setContinuousLayout(true);
+		panel.add(new JLabel(Localized.getString("faWMAlphabet")));
 
-        mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(mainPanelScrollPane, BorderLayout.CENTER);
+		alphabetTextField = new JTextField(getDataWrapperFA()
+				.getSymbolsString());
+		alphabetTextField.setPreferredSize(new Dimension(100, 20));
+		alphabetTextField.addCaretListener(new CaretListener() {
+			public void caretUpdate(CaretEvent e) {
+				handleAlphabetTextFieldEvent();
+			}
 
-        return mainPanel;
-    }
+		});
 
-    public boolean supportsOverlay() {
-        return true;
-    }
+		alphabetTextField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleAlphabetTextFieldEvent();
+			}
+		});
 
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if(visible && overlayVisible)
-            overlay.setVisible(true);
-        else if(!visible && overlayVisible)
-            overlay.setVisible(false);
-    }
+		panel.add(alphabetTextField);
 
-    public boolean isOverlayVisible() {
-        return overlay.isVisible();
-    }
+		panel.add(new JLabel(Localized.getString("faWMString")));
 
-    public void toggleOverlayVisibility() {
-        overlay.setVisible(!overlay.isVisible());
-        overlayVisible = overlay.isVisible();
-    }
+		stringTextField = new JTextField("");
+		stringTextField.setPreferredSize(new Dimension(100, 20));
+		stringTextField.addCaretListener(new CaretListener() {
+			public void caretUpdate(CaretEvent e) {
+				handleStringTextFieldEvent();
+			}
 
-    // *** Event methods
+		});
 
-    public void handleAlphabetTextFieldEvent() {
-        String s = alphabetTextField.getText();
-        if(!s.equals(getDataWrapperFA().getSymbolsString())) {
-            getDataWrapperFA().setSymbolsString(s);
-            changeOccured();
-        }
-    }
+		stringTextField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				handleStringTextFieldEvent();
+			}
+		});
 
-    public void handleStringTextFieldEvent() {
-        String s = stringTextField.getText();
-        if(!s.equals(getDataWrapperFA().getString())) {
-            getDataWrapperFA().setString(s);
-            overlay.textChanged();
-            changeOccured();
-        }
-    }
+		panel.add(stringTextField);
 
-    public String getString() {
-        return stringTextField.getText();
-    }
+		JButton start = new JButton(Localized.getString("faWMRun"));
+		start.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getWindowFA().run();
+			}
+		});
 
-    // *** Public methods
+		panel.add(start);
 
-    public FAMachine convertNFA2DFA() {
-        return getDataWrapperFA().getMachine().convertNFA2DFA();
-    }
+		return panel;
+	}
 
-    public void setFAMachine(FAMachine machine) {
-        getDataWrapperFA().setMachine(machine);
-        getDataWrapperFA().getGraphicMachine().setMachine(machine);
-        getDataWrapperFA().getGraphicMachine().reconstruct();
+	public JComponent createAutomataPanel() {
+		mainPanelScrollPane = new JScrollPane(getGraphicPanel());
+		mainPanelScrollPane.setPreferredSize(new Dimension(640, 480));
+		mainPanelScrollPane.setWheelScrollingEnabled(true);
 
-        getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
-        getFAGraphicPanel().centerAll();
-        getFAGraphicPanel().repaint();
-    }
+		mainPanelSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		mainPanelSplit.setContinuousLayout(true);
 
-    public void rebuild() {
-        super.rebuild();
-        getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
-        typeComboBox.setSelectedIndex(getDataWrapperFA().getMachineType());
-        alphabetTextField.setText(getDataWrapperFA().getSymbolsString());
-        stringTextField.setText(getDataWrapperFA().getString());
-    }
+		mainPanel = new JPanel(new BorderLayout());
+		mainPanel.add(mainPanelScrollPane, BorderLayout.CENTER);
 
-    public void setTitle(String title) {
-        getWindowFA().setWindowMachineTitle(this, title);
-        getDataWrapperFA().setName(title);
-        changeOccured();        
-    }
+		return mainPanel;
+	}
 
-    public String getTitle() {
-        return getWindowFA().getWindowMachineTitle(this);
-    }
+	public boolean supportsOverlay() {
+		return true;
+	}
 
-    public void displaySettings() {
-        if(settings == null)
-            settings = new WindowMachineFASettings(this);
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible && overlayVisible)
+			overlay.setVisible(true);
+		else if (!visible && overlayVisible)
+			overlay.setVisible(false);
+	}
 
-        settings.display();
-    }
+	public boolean isOverlayVisible() {
+		return overlay.isVisible();
+	}
 
-    public void setGraphicsSize(int dx, int dy) {
-        getGraphicPanel().setRealSize(dx, dy);
-        getDataWrapperFA().setSize(new Dimension(dx, dy));
-        changeOccured();
-    }
+	public void toggleOverlayVisibility() {
+		overlay.setVisible(!overlay.isVisible());
+		overlayVisible = overlay.isVisible();
+	}
 
-    public Dimension getGraphicSize() {
-        return getGraphicPanel().getRealSize();
-    }
+	// *** Event methods
 
-    public void setDebugInfo(String remaining) {
-        String original = stringTextField.getText();
-        overlay.setString(original, original.length()-remaining.length());
-    }
+	public void handleAlphabetTextFieldEvent() {
+		String s = alphabetTextField.getText();
+		if (!s.equals(getDataWrapperFA().getSymbolsString())) {
+			getDataWrapperFA().setSymbolsString(s);
+			changeOccured();
+		}
+	}
 
-    public void viewSizeDidChange() {
-        // do nothing
-    }
+	public void handleStringTextFieldEvent() {
+		String s = stringTextField.getText();
+		if (!s.equals(getDataWrapperFA().getString())) {
+			getDataWrapperFA().setString(s);
+			overlay.textChanged();
+			changeOccured();
+		}
+	}
+
+	public String getString() {
+		return stringTextField.getText();
+	}
+
+	// *** Public methods
+
+	public FAMachine convertNFA2DFA() {
+		return getDataWrapperFA().getMachine().convertNFA2DFA();
+	}
+
+	public void setFAMachine(FAMachine machine) {
+		getDataWrapperFA().setMachine(machine);
+		getDataWrapperFA().getGraphicMachine().setMachine(machine);
+		getDataWrapperFA().getGraphicMachine().reconstruct();
+
+		getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
+		getFAGraphicPanel().centerAll();
+		getFAGraphicPanel().repaint();
+	}
+
+	public void rebuild() {
+		super.rebuild();
+		getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
+		typeComboBox.setSelectedIndex(getDataWrapperFA().getMachineType());
+		alphabetTextField.setText(getDataWrapperFA().getSymbolsString());
+		stringTextField.setText(getDataWrapperFA().getString());
+	}
+
+	public void setTitle(String title) {
+		getWindowFA().setWindowMachineTitle(this, title);
+		getDataWrapperFA().setName(title);
+		changeOccured();
+	}
+
+	public String getTitle() {
+		return getWindowFA().getWindowMachineTitle(this);
+	}
+
+	public void displaySettings() {
+		if (settings == null)
+			settings = new WindowMachineFASettings(this);
+
+		settings.display();
+	}
+
+	public void setGraphicsSize(int dx, int dy) {
+		getGraphicPanel().setRealSize(dx, dy);
+		getDataWrapperFA().setSize(new Dimension(dx, dy));
+		changeOccured();
+	}
+
+	public Dimension getGraphicSize() {
+		return getGraphicPanel().getRealSize();
+	}
+
+	public void setDebugInfo(String remaining) {
+		String original = stringTextField.getText();
+		overlay.setString(original, original.length() - remaining.length());
+	}
+
+	public void viewSizeDidChange() {
+		// do nothing
+	}
+
+
+
+	@Override
+	public void dragGestureRecognized(DragGestureEvent dge) {
+		// TODO Auto-generated method stub
+		System.out.println("Drag Gesture Recognized!");
+		transferable = new StringSelection(sampleJList.getSelectedValue().toString());
+		ds.startDrag(dge, DragSource.DefaultCopyDrop, transferable, this);
+		Constant.s=sampleJList.getSelectedValues()[0].toString();
+		Constant.s=Constant.removeExtention(Constant.s);
+		
+	}
+
+	@Override
+	public void dragDropEnd(DragSourceDropEvent dsde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragEnter(DragSourceDragEvent dsde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragExit(DragSourceEvent dse) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragOver(DragSourceDragEvent dsde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dropActionChanged(DragSourceDragEvent dsde) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }
