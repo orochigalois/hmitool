@@ -31,10 +31,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.usfca.vas.window.fa;
 
+
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperFA;
-import edu.usfca.vas.graphics.fa.GViewFAMachine;
-
 import edu.usfca.vas.graphics.fa.*;
 import edu.usfca.vas.machine.fa.FAMachine;
 import edu.usfca.vas.window.WindowMachineAbstract;
@@ -46,7 +45,9 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -119,8 +120,9 @@ DragGestureListener{
 		sampleJList.setCellRenderer(new JavaLocationRenderer());
 		Font displayFont = new Font("Serif", Font.BOLD, 18);
 		sampleJList.setFont(displayFont);
-		
-	
+		sampleJList.setDragEnabled(true);
+		sampleJList.setDropMode(DropMode.INSERT);
+		sampleJList.setTransferHandler(new MyListDropHandler(sampleJList));
 	
 
 		ds = new DragSource();
@@ -128,10 +130,8 @@ DragGestureListener{
 				DnDConstants.ACTION_COPY, this);
 		
 
-//		sampleJList.setDropMode(DropMode.INSERT);
-//		sampleJList.setDragEnabled(true);
-		//sampleJList.setTransferHandler(handler);
 
+		
 
 		
 		JScrollPane scrollPane = new JScrollPane(sampleJList,
@@ -415,4 +415,46 @@ DragGestureListener{
 		
 	}
 	
+}
+class MyListDropHandler extends TransferHandler {
+	JList list;
+
+	public MyListDropHandler(JList list) {
+		this.list = list;
+	}
+
+	public boolean canImport(TransferHandler.TransferSupport support) {
+		if (!support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+			return false;
+		}
+		JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
+		if (dl.getIndex() == -1) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+//	public boolean importData(TransferHandler.TransferSupport support) {
+//		if (!canImport(support)) {
+//			return false;
+//		}
+//
+//		Transferable transferable = support.getTransferable();
+//		String indexString;
+//		try {
+//			indexString = (String) transferable
+//					.getTransferData(DataFlavor.stringFlavor);
+//		} catch (Exception e) {
+//			return false;
+//		}
+//
+//		int index = Integer.parseInt(indexString);
+//		JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
+//		int dropTargetIndex = dl.getIndex();
+//
+//		System.out.println(dropTargetIndex + " : ");
+//		System.out.println("inserted");
+//		return true;
+//	}
 }
