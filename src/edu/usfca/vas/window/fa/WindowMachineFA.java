@@ -1,36 +1,4 @@
-/*
-
-[The "BSD licence"]
-Copyright (c) 2004 Jean Bovet
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- */
-
 package edu.usfca.vas.window.fa;
-
 
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperFA;
@@ -64,15 +32,25 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
-public class WindowMachineFA extends WindowMachineAbstract implements DragSourceListener,
-DragGestureListener{
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+public class WindowMachineFA extends WindowMachineAbstract {
 
 	protected WindowMachineFASettings settings = null;
 
 	protected JTextField alphabetTextField;
 	protected JTextField stringTextField;
-	protected JComboBox typeComboBox;
+	// protected JComboBox typeComboBox;
 	protected JPanel mainPanel;
 	protected JSplitPane mainPanelSplit;
 	protected JScrollPane mainPanelScrollPane;
@@ -83,11 +61,9 @@ DragGestureListener{
 	protected boolean overlayVisible;
 
 	protected JComboBox eventComboBox;
-	
-	DragSource ds;
 
-	StringSelection transferable;
-	JList sampleJList;
+	AlexViewList viewList;
+	AlexEventList eventList;
 
 	public WindowMachineFA(XJFrame parent) {
 		super(parent);
@@ -100,47 +76,105 @@ DragGestureListener{
 		getFAGraphicPanel().setRealSize(getDataWrapperFA().getSize());
 
 		setLayout(new BorderLayout());
-
 		add(createUpperPanel(), BorderLayout.NORTH);
 		add(createAutomataPanel(), BorderLayout.CENTER);
 		add(createLeftPanel(), BorderLayout.WEST);
-
+		add(createRightPanel(), BorderLayout.EAST);
 		overlay = new WindowMachineFAOverlay(parent.getJFrame(), mainPanel);
 		overlay.setStringField(stringTextField);
 	}
 
 	public JPanel createLeftPanel() {
 		JPanel panel = new JPanel();
-		panel.setMaximumSize(panel.getPreferredSize());
-		panel.setMinimumSize(new Dimension(800, 800));
-
-		JavaLocationCollection collection = new JavaLocationCollection();
-		JavaLocationListModel listModel = new JavaLocationListModel(collection);
-		sampleJList = new JList(listModel);
-		sampleJList.setCellRenderer(new JavaLocationRenderer());
-		Font displayFont = new Font("Serif", Font.BOLD, 18);
-		sampleJList.setFont(displayFont);
-		sampleJList.setDragEnabled(true);
-		sampleJList.setDropMode(DropMode.INSERT);
-		sampleJList.setTransferHandler(new MyListDropHandler(sampleJList));
-	
-
-		ds = new DragSource();
-		DragGestureRecognizer dgr = ds.createDefaultDragGestureRecognizer(sampleJList,
-				DnDConstants.ACTION_COPY, this);
-		
-
-
-		
-
-		
-		JScrollPane scrollPane = new JScrollPane(sampleJList,
-	            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-	            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
 		panel.setLayout(new BorderLayout());
 
-		panel.add(scrollPane, BorderLayout.CENTER);
+		// To keep this panel's size from changing, I would set all three
+		// available size constraints
+		panel.setPreferredSize(new Dimension(200, 900));
+		panel.setMinimumSize(new Dimension(200, 900));
+		panel.setMaximumSize(new Dimension(200, 900));
+
+		// Create a list that allows adds and removes
+
+		viewList = new AlexViewList(Constant.viewModel);
+
+		// Initialize the list with items
+		String[] items = {};
+		for (int i = 0; i < items.length; i++) {
+			Constant.viewModel.add(i, items[i]);
+		}
+
+		// // Append an item
+		// int pos = list.getModel().getSize();
+		// model.add(pos, "E");
+		//
+		// // Insert an item at the beginning
+		// pos = 0;
+		// model.add(pos, "a");
+
+		JScrollPane scrollPane = new JScrollPane(viewList,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+		panel.add(scrollPane);
+
+		return panel;
+
+	}
+
+	public JPanel createRightPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
+		// To keep this panel's size from changing, I would set all three
+		// available size constraints
+		panel.setPreferredSize(new Dimension(160, 900));
+		panel.setMinimumSize(new Dimension(160, 900));
+		panel.setMaximumSize(new Dimension(160, 900));
+
+		// Create a list that allows adds and removes
+
+		eventList = new AlexEventList(Constant.eventModel);
+
+		eventList.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()) {
+
+					if (eventList.getSelectedValue() != null) {
+						Constant.currentEvent = eventList.getSelectedValue()
+								.toString();
+						Constant.currentEventIndex = eventList
+								.getSelectedIndex();
+					} else {
+						Constant.currentEventIndex = -1;
+					}
+				}
+			}
+		});
+
+		// Initialize the list with items
+		// String[] items = {};
+		// for (int i=0; i<items.length; i++) {
+		// Constant.eventModel.add(i, items[i]);
+		// }
+		//
+		// // // Append an item
+		// int pos = Constant.eventModel.getSize();
+		// Constant.eventModel.add(pos, "1");
+		// pos = Constant.eventModel.getSize();
+		// Constant.eventModel.add(pos, "2");
+		// pos = Constant.eventModel.getSize();
+		// Constant.eventModel.add(pos, "3");
+		// pos = Constant.eventModel.getSize();
+		// Constant.eventModel.add(pos, "4");
+
+		JScrollPane scrollPane = new JScrollPane(eventList,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+		panel.add(scrollPane);
 
 		return panel;
 
@@ -160,9 +194,10 @@ DragGestureListener{
 
 	public JPanel createUpperPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.setMaximumSize(new Dimension(99999, 30));
 
-		panel.add(designToolFA = new DesignToolsFA(), BorderLayout.WEST);
+		panel.setMaximumSize(new Dimension(99999, 30));
+		panel.add(new AlexFolderChooser(), BorderLayout.WEST);
+		panel.add(designToolFA = new DesignToolsFA(), BorderLayout.CENTER);
 		panel.add(createControlPanel(), BorderLayout.EAST);
 
 		getFAGraphicPanel().setDesignToolsPanel(designToolFA);
@@ -174,22 +209,22 @@ DragGestureListener{
 		JPanel panel = new JPanel();
 		panel.setMaximumSize(new Dimension(99999, 30));
 
-		panel.add(new JLabel(Localized.getString("faWMAutomaton")));
-		typeComboBox = new JComboBox(new String[] { Localized.getString("DFA"),
-				Localized.getString("NFA") });
-		typeComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int type = typeComboBox.getSelectedIndex();
-				if (type != getDataWrapperFA().getMachineType()) {
-					getDataWrapperFA().setMachineType(type);
-					changeOccured();
-				}
-			}
-		});
+		// panel.add(new JLabel(Localized.getString("faWMAutomaton")));
+		// typeComboBox = new JComboBox(new String[] {
+		// Localized.getString("DFA"),
+		// Localized.getString("NFA") });
+		// typeComboBox.addActionListener(new ActionListener() {
+		// public void actionPerformed(ActionEvent e) {
+		// int type = typeComboBox.getSelectedIndex();
+		// if (type != getDataWrapperFA().getMachineType()) {
+		// getDataWrapperFA().setMachineType(type);
+		// changeOccured();
+		// }
+		// }
+		// });
+		// panel.add(typeComboBox);
 
-		panel.add(typeComboBox);
-
-		panel.add(new JLabel("event"));
+		//panel.add(new JLabel("event"));
 		eventComboBox = new JComboBox(new String[] { "e1", "e2" });
 		eventComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -201,9 +236,9 @@ DragGestureListener{
 			}
 		});
 
-		panel.add(eventComboBox);
+		//panel.add(eventComboBox);
 
-		panel.add(new JLabel(Localized.getString("faWMAlphabet")));
+		//panel.add(new JLabel(Localized.getString("faWMAlphabet")));
 
 		alphabetTextField = new JTextField(getDataWrapperFA()
 				.getSymbolsString());
@@ -221,9 +256,9 @@ DragGestureListener{
 			}
 		});
 
-		panel.add(alphabetTextField);
+		//panel.add(alphabetTextField);
 
-		panel.add(new JLabel(Localized.getString("faWMString")));
+		//panel.add(new JLabel(Localized.getString("faWMString")));
 
 		stringTextField = new JTextField("");
 		stringTextField.setPreferredSize(new Dimension(100, 20));
@@ -240,16 +275,123 @@ DragGestureListener{
 			}
 		});
 
-		panel.add(stringTextField);
+		//panel.add(stringTextField);
+		
+		
+		
+		panel.add(Constant.labelScript);
+		
+		JButton script = new JButton("script");
+		script.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser chooser;
+        		chooser = new JFileChooser();
+        		chooser.setCurrentDirectory(new java.io.File("."));
+        		chooser.setDialogTitle("Select the test script file");
+        		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        		//
+        		// disable the "All files" option.
+        		//
+        		chooser.setAcceptAllFileFilterUsed(true);
+        		
+        		chooser.addChoosableFileFilter(new FileNameExtensionFilter("TXT", "txt"));
+ 
+        
+        		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        			Constant.labelScript.setText(chooser.getSelectedFile().toString());
+        			try {
+						BufferedReader br;
+						br = new BufferedReader(new FileReader(chooser.getSelectedFile().toString()));
+						StringBuilder sb = new StringBuilder();
+        		        String line = br.readLine();
 
-		JButton start = new JButton(Localized.getString("faWMRun"));
+        		        while (line != null) {
+        		            sb.append(line);
+        		            sb.append("\n");
+        		            line = br.readLine();
+        		        }
+						Constant.wholeScript=sb.toString();
+						br.close();
+				
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+
+        		 
+        		    
+        		} else {
+        			//System.out.println("No Selection ");
+        		}
+        		
+			
+			}
+		});
+		panel.add(script);
+		
+		JButton run = new JButton("auto");
+		run.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getWindowFA().debug();
+			
+				getWindowFA().debugProceed();
+			}
+		});
+		panel.add(run);
+
+		JButton start = new JButton("manu");
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				getWindowFA().run();
+				getWindowFA().debug();
 			}
 		});
 
 		panel.add(start);
+
+		JButton addEvent = new JButton("add");
+		addEvent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String event = (String) JOptionPane.showInputDialog(null,
+						"Enter a name for this new event", "New Event",
+						JOptionPane.QUESTION_MESSAGE, null, null, null);
+				if(event!=null)
+					Constant.eventModel.add(Constant.eventModel.getSize(), event);
+			}
+		});
+
+		panel.add(addEvent);
+
+		JButton removeEvent = new JButton("del");
+		removeEvent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (Constant.currentEventIndex != -1)
+					Constant.eventModel.remove(Constant.currentEventIndex);
+
+			}
+		});
+
+		panel.add(removeEvent);
+
+		JButton editEvent = new JButton("edit");
+		editEvent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (Constant.currentEventIndex != -1) {
+					String event = (String) JOptionPane.showInputDialog(null,
+							"Enter a name for this new event", "New Event",
+							JOptionPane.QUESTION_MESSAGE, null, null,
+							Constant.currentEvent);
+					if (event != null) {
+						Constant.eventModel.remove(Constant.currentEventIndex);
+						Constant.eventModel.add(Constant.eventModel.getSize(),
+								event);
+					}
+				}
+			}
+		});
+
+		panel.add(editEvent);
 
 		return panel;
 	}
@@ -309,7 +451,8 @@ DragGestureListener{
 	}
 
 	public String getString() {
-		return stringTextField.getText();
+		//return stringTextField.getText();
+		return Constant.wholeScript;
 	}
 
 	// *** Public methods
@@ -331,7 +474,7 @@ DragGestureListener{
 	public void rebuild() {
 		super.rebuild();
 		getFAGraphicPanel().setMachine(getDataWrapperFA().getGraphicMachine());
-		typeComboBox.setSelectedIndex(getDataWrapperFA().getMachineType());
+		// typeComboBox.setSelectedIndex(getDataWrapperFA().getMachineType());
 		alphabetTextField.setText(getDataWrapperFA().getSymbolsString());
 		stringTextField.setText(getDataWrapperFA().getString());
 	}
@@ -372,89 +515,4 @@ DragGestureListener{
 		// do nothing
 	}
 
-
-
-	@Override
-	public void dragGestureRecognized(DragGestureEvent dge) {
-		// TODO Auto-generated method stub
-		System.out.println("Drag Gesture Recognized!");
-		transferable = new StringSelection(sampleJList.getSelectedValue().toString());
-		ds.startDrag(dge, DragSource.DefaultCopyDrop, transferable, this);
-		Constant.s=sampleJList.getSelectedValues()[0].toString();
-		Constant.s=Constant.removeExtention(Constant.s);
-		
-	}
-
-	@Override
-	public void dragDropEnd(DragSourceDropEvent dsde) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dragEnter(DragSourceDragEvent dsde) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dragExit(DragSourceEvent dse) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dragOver(DragSourceDragEvent dsde) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dropActionChanged(DragSourceDragEvent dsde) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-}
-class MyListDropHandler extends TransferHandler {
-	JList list;
-
-	public MyListDropHandler(JList list) {
-		this.list = list;
-	}
-
-	public boolean canImport(TransferHandler.TransferSupport support) {
-		if (!support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-			return false;
-		}
-		JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
-		if (dl.getIndex() == -1) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-//	public boolean importData(TransferHandler.TransferSupport support) {
-//		if (!canImport(support)) {
-//			return false;
-//		}
-//
-//		Transferable transferable = support.getTransferable();
-//		String indexString;
-//		try {
-//			indexString = (String) transferable
-//					.getTransferData(DataFlavor.stringFlavor);
-//		} catch (Exception e) {
-//			return false;
-//		}
-//
-//		int index = Integer.parseInt(indexString);
-//		JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
-//		int dropTargetIndex = dl.getIndex();
-//
-//		System.out.println(dropTargetIndex + " : ");
-//		System.out.println("inserted");
-//		return true;
-//	}
 }

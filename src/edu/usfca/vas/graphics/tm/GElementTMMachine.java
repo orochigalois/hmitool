@@ -40,6 +40,7 @@ import edu.usfca.xj.appkit.gview.object.GLink;
 import edu.usfca.xj.foundation.XJXMLSerializable;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.Iterator;
 import java.util.ListIterator;

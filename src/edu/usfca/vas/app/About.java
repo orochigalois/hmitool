@@ -33,12 +33,14 @@ package edu.usfca.vas.app;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+
 import edu.usfca.vas.graphics.IconManager;
 import edu.usfca.xj.appkit.app.XJAboutBox;
 import edu.usfca.xj.appkit.frame.XJPanel;
 import edu.usfca.xj.appkit.text.XJURLLabel;
 
 import javax.swing.*;
+
 import java.awt.*;
 
 public class About extends XJPanel {

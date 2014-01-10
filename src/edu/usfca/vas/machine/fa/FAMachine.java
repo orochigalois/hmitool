@@ -49,9 +49,11 @@ public class FAMachine implements XJXMLSerializable {
 
     protected Set stateSet;
 
-    protected int type = MACHINE_TYPE_DFA;
+    protected int type = MACHINE_TYPE_NFA;
 
     protected transient String debugString;
+    
+    
     protected transient String debugLastSymbol;
 
     public FAMachine() {
@@ -208,7 +210,8 @@ public class FAMachine implements XJXMLSerializable {
         stateSet = getStartStates();
         
         for(int i=0; i<s.length(); i++) {
-            put(s.charAt(i));
+            //put(s.charAt(i));
+            put(s);
         }
         return isAcceptedState(stateSet);
     }
@@ -292,8 +295,13 @@ public class FAMachine implements XJXMLSerializable {
     // *** Debug methods
     public String getCurrentState()
     {
-    	String a=stateSet.toArray()[0].toString();
-    	return a;
+    	String a;
+    	if(stateSet.toArray().length!=0)
+
+    		return stateSet.toArray()[0].toString();
+ 
+    	else
+    		return null;
 
     }
     public String getStartState()
@@ -314,7 +322,7 @@ public class FAMachine implements XJXMLSerializable {
 
         transitions.getLastTransitionSet().clear();
 
-        put(s.charAt(0));
+        put(s);
 
         return true;
     }
@@ -330,10 +338,12 @@ public class FAMachine implements XJXMLSerializable {
 
         transitions.getLastTransitionSet().clear();
 
-        put(debugString.charAt(0));
+        String[] lines = debugString.split("\n");
+        //put(debugString.charAt(0));
+        put(lines[0]);
 
-        debugLastSymbol = debugString.substring(0, 1);
-        debugString = debugString.substring(1);
+        debugLastSymbol = lines[0];
+        debugString = debugString.substring(1+lines[0].length());
 
         if(stateSet.isEmpty())
             return false;
@@ -364,8 +374,8 @@ public class FAMachine implements XJXMLSerializable {
         debugLastSymbol = "";
     }
 
-    public void put(char c) {
-        stateSet = getNextStateSet(stateSet, String.valueOf(c));
+    public void put(String c) {
+        stateSet = getNextStateSet(stateSet, c);
     }
 
 }

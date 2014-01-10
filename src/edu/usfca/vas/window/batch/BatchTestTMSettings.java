@@ -35,6 +35,7 @@ import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.machine.tm.TMMachine;
 import edu.usfca.vas.window.tm.TapeConfiguration;
@@ -46,6 +47,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

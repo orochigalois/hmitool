@@ -40,6 +40,7 @@ import edu.usfca.xj.appkit.menu.XJMenu;
 import edu.usfca.xj.appkit.menu.XJMenuItem;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.Iterator;
 

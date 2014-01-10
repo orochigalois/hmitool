@@ -38,6 +38,7 @@ import edu.usfca.xj.foundation.XJSystem;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -81,18 +82,19 @@ public class XJFileChooser {
 
         JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(multiple);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if(extensions == null || extensions.size() == 0)
             chooser.setAcceptAllFileFilterUsed(true);
         else {
-            for(int i=0; i<extensions.size(); i++) {
-                XJFileFilter ff = XJFileFilter.createFileFilter((String)extensions.get(i),
-                        (String)descriptions.get(i));
-                chooser.addChoosableFileFilter(ff);
-                if(extensions.size() == 1 && i == 0)
-                    chooser.setFileFilter(ff);
-            }
-            if(extensions.size() > 1)
-                chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+//            for(int i=0; i<extensions.size(); i++) {
+//                XJFileFilter ff = XJFileFilter.createFileFilter((String)extensions.get(i),
+//                        (String)descriptions.get(i));
+//                chooser.addChoosableFileFilter(ff);
+//                if(extensions.size() == 1 && i == 0)
+//                    chooser.setFileFilter(ff);
+//            }
+//            if(extensions.size() > 1)
+//                chooser.setFileFilter(chooser.getAcceptAllFileFilter());
         }
 
         if(selectedFilePath != null)
@@ -135,19 +137,19 @@ public class XJFileChooser {
         if(extensions == null || extensions.size() == 0)
             chooser.setAcceptAllFileFilterUsed(false);
         else {
-            chooser.setAcceptAllFileFilterUsed(acceptAll);
-            XJFileFilter firstFF = null;
-            for(int i=0; i<extensions.size(); i++) {
-                XJFileFilter ff = XJFileFilter.createFileFilter((String)extensions.get(i),
-                        (String)descriptions.get(i));
-                chooser.addChoosableFileFilter(ff);
-                if((extensions.size() == 1 || !acceptAll) && i == 0)
-                    firstFF = ff;
-            }
-            if(extensions.size() > 1 && acceptAll)
-                chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-            else
-                chooser.setFileFilter(firstFF);
+//            chooser.setAcceptAllFileFilterUsed(acceptAll);
+//            XJFileFilter firstFF = null;
+//            for(int i=0; i<extensions.size(); i++) {
+//                XJFileFilter ff = XJFileFilter.createFileFilter((String)extensions.get(i),
+//                        (String)descriptions.get(i));
+//                chooser.addChoosableFileFilter(ff);
+//                if((extensions.size() == 1 || !acceptAll) && i == 0)
+//                    firstFF = ff;
+//            }
+//            if(extensions.size() > 1 && acceptAll)
+//                chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+//            else
+//                chooser.setFileFilter(firstFF);
         }
 
         if(selectedFilePath != null)

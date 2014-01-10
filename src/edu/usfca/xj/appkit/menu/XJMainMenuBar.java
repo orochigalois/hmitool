@@ -260,17 +260,17 @@ public class XJMainMenuBar implements XJMenuItemDelegate {
 
         if((ignore & IGNORE_FILEMENU) == 0)
             addMenu(createFileMenu());
-        if((ignore & IGNORE_EDITMENU) == 0)
-            addMenu(createEditMenu());
+//        if((ignore & IGNORE_EDITMENU) == 0)
+//            addMenu(createEditMenu());
 
         // Customization between menu Edit and menu Help
         if(customizer != null)
             customizer.customizeMenuBar(this);
 
-        if((ignore & IGNORE_WINDOWMENU) == 0)
-            addMenu(createWindowMenu());
-        if((ignore & IGNORE_HELPMENU) == 0)
-            addMenu(createHelpMenu());
+//        if((ignore & IGNORE_WINDOWMENU) == 0)
+//            addMenu(createWindowMenu());
+//        if((ignore & IGNORE_HELPMENU) == 0)
+//            addMenu(createHelpMenu());
     }
 
     public XJMenu createFileMenu() {
@@ -329,7 +329,7 @@ public class XJMainMenuBar implements XJMenuItemDelegate {
             menuFile.addItem(createRecentFilesMenu());
         }
         menuFile.addSeparator();
-        menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Close"), KeyEvent.VK_W, MI_CLOSE));
+        //menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Close"), KeyEvent.VK_W, MI_CLOSE));
         if(persistence) {
             menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Save"), KeyEvent.VK_S, MI_SAVE));
             menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("SaveAs"), MI_SAVEAS));
@@ -338,8 +338,8 @@ public class XJMainMenuBar implements XJMenuItemDelegate {
         if(!XJSystem.isMacOS()) {
             menuFile.addSeparator();
             if(XJApplication.shared().hasPreferencesMenuItem()) {
-                menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Preferences"), KeyEvent.VK_COMMA, MI_PREFS));
-                menuFile.addSeparator();                
+//                menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Preferences"), KeyEvent.VK_COMMA, MI_PREFS));
+//                menuFile.addSeparator();                
             }
             menuFile.addItem(buildMenuItem(XJLocalizable.getXJString("Quit"), KeyEvent.VK_Q, MI_QUIT));
         }

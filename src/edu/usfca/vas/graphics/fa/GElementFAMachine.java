@@ -42,6 +42,7 @@ import edu.usfca.xj.appkit.gview.object.GLink;
 import edu.usfca.xj.foundation.XJXMLSerializable;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -110,7 +111,8 @@ public class GElementFAMachine extends GElement implements XJXMLSerializable {
                 GLink link = (GLink)element;
                 if(getState1(link).state.name.equals(transition.s1) &&
                    getState2(link).state.name.equals(transition.s2)  &&
-                    Tool.symbolsInPattern(link.pattern).contains(transition.symbol))
+                    //Tool.symbolsInPattern(link.pattern).contains(transition.symbol))
+                	link.pattern.equals(transition.symbol))
                 {
                     return link;
                 }
@@ -137,15 +139,20 @@ public class GElementFAMachine extends GElement implements XJXMLSerializable {
     }
 
     public boolean createLink(GElementFAState source, String sourceAnchorKey, GElementFAState target, String targetAnchorKey, int shape, Point mouse) {
-        String pattern = (String)JOptionPane.showInputDialog(null, Localized.getString("faNewLinkMessage"),
-                                    Localized.getString("faNewLinkTitle"),
-                                    JOptionPane.QUESTION_MESSAGE, null, null, null);
-        if(pattern != null) {
-            machine.addTransitionPattern(source.state.name, pattern, target.state.name);
-            addElement(new GLink(source, sourceAnchorKey, target, targetAnchorKey, shape, pattern, mouse, GView.DEFAULT_LINK_FLATENESS));
+//        String pattern = (String)JOptionPane.showInputDialog(null, Localized.getString("faNewLinkMessage"),
+//                                    Localized.getString("faNewLinkTitle"),
+//                                    JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if(Constant.currentEvent != null) {
+            machine.addTransitionPattern(source.state.name, Constant.currentEvent, target.state.name);
+            addElement(new GLink(source, sourceAnchorKey, target, targetAnchorKey, shape, Constant.currentEvent, mouse, GView.DEFAULT_LINK_FLATENESS));
+            
         }
-
-        return pattern != null;
+        else
+        {
+        	JOptionPane.showMessageDialog(null, "You must select an event first!");
+        }
+        return Constant.currentEvent != null;
+//        return pattern != null;
     }
 
     public boolean editLink(GLink link) {
@@ -227,9 +234,9 @@ public class GElementFAMachine extends GElement implements XJXMLSerializable {
             return null;
         }
 
-        if(s == null)
-            s = (String)JOptionPane.showInputDialog(null, Localized.getString("faParseString"), Localized.getString("faStartTitle"),
-                                    JOptionPane.QUESTION_MESSAGE, null, null, null);
+//        if(s == null)
+//            s = (String)JOptionPane.showInputDialog(null, Localized.getString("faParseString"), Localized.getString("faStartTitle"),
+//                                    JOptionPane.QUESTION_MESSAGE, null, null, null);
 
         return s;
     }

@@ -56,9 +56,10 @@ public class FATransitions implements XJXMLSerializable {
     }
 
     public void addTransitionPattern(String s1, String pattern, String s2) {
-        Iterator iterator = Tool.symbolsInPattern(pattern).iterator();
-        while(iterator.hasNext())
-            addTransition(s1, (String)iterator.next(), s2);
+//        Iterator iterator = Tool.symbolsInPattern(pattern).iterator();
+//        while(iterator.hasNext())
+//            addTransition(s1, (String)iterator.next(), s2);
+    	addTransition(s1, pattern, s2);
     }
 
     public void addTransition(String s1, String symbol, String s2) {

@@ -35,12 +35,18 @@ import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
+
+import edu.usfca.vas.graphics.fa.Constant;
 import edu.usfca.xj.appkit.frame.XJDialog;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileFilter;
 
 public class WindowMachineFASettings extends XJDialog {
 
@@ -70,6 +76,32 @@ public class WindowMachineFASettings extends XJDialog {
                 close();
             }
         });
+        bgButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            	JFileChooser chooser;
+        		chooser = new JFileChooser();
+        		chooser.setCurrentDirectory(new java.io.File("."));
+        		chooser.setDialogTitle("Select the image used for background");
+        		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        		//
+        		// disable the "All files" option.
+        		//
+        		chooser.setAcceptAllFileFilterUsed(true);
+        		
+        		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PNG", "png"));
+ 
+        
+        		if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+        			label9.setText(chooser.getSelectedFile().toString());
+        		} else {
+        			//System.out.println("No Selection ");
+        		}
+        	
+                
+            }
+        });
+        
     }
 
     public void resize() {
@@ -87,6 +119,9 @@ public class WindowMachineFASettings extends XJDialog {
 
         verticalSpinner.setValue(new Integer(wm.getVerticalMagnetics()));
         horizontalSpinner.setValue(new Integer(wm.getHorizontalMagnetics()));
+        xField.setText(String.valueOf(Constant.simulator_x));
+        yField.setText(String.valueOf(Constant.simulator_y));
+        label9.setText(String.valueOf(Constant.simulator_bg));
     }
 
     public void popValues() {
@@ -95,6 +130,12 @@ public class WindowMachineFASettings extends XJDialog {
         Integer horizontal = (Integer)horizontalSpinner.getValue();
         Integer vertical = (Integer)horizontalSpinner.getValue();
         wm.setMagnetics(horizontal.intValue(), vertical.intValue());
+        Constant.simulator_x=Integer.parseInt(xField.getText());
+        Constant.simulator_y=Integer.parseInt(yField.getText());
+        Constant.simulator_bg=label9.getText();
+        Constant.simulatorViewFrame.adjustImgPosition(Constant.simulator_x,Constant.simulator_y);
+        Constant.simulatorViewFrame.resetBg(label9.getText());
+        
     }
 
     public void display() {
@@ -110,6 +151,13 @@ public class WindowMachineFASettings extends XJDialog {
         contentPane = new JPanel();
         label1 = new JLabel();
         nameField = new JTextField();
+        
+        goodiesFormsSeparator3 = compFactory.createSeparator("Simulator Background");
+        label7 = new JLabel();
+        label8 = new JLabel();
+        label9 = new JLabel();
+        xField = new JTextField();
+        yField = new JTextField();
         goodiesFormsSeparator2 = compFactory.createSeparator("Machine Size");
         label2 = new JLabel();
         widthField = new JTextField();
@@ -123,6 +171,7 @@ public class WindowMachineFASettings extends XJDialog {
         buttonBar = new JPanel();
         okButton = new JButton();
         cancelButton = new JButton();
+        bgButton = new JButton();
         CellConstraints cc = new CellConstraints();
 
         //======== this ========
@@ -133,7 +182,7 @@ public class WindowMachineFASettings extends XJDialog {
         //======== dialogPane ========
         {
             dialogPane.setBorder(Borders.DIALOG_BORDER);
-            dialogPane.setPreferredSize(new Dimension(350, 300));
+            dialogPane.setPreferredSize(new Dimension(350, 600));
             dialogPane.setLayout(new BorderLayout());
 
             //======== contentPane ========
@@ -167,7 +216,17 @@ public class WindowMachineFASettings extends XJDialog {
                         FormFactory.LINE_GAP_ROWSPEC,
                         FormFactory.DEFAULT_ROWSPEC,
                         FormFactory.LINE_GAP_ROWSPEC,
-                        FormFactory.DEFAULT_ROWSPEC
+                        FormFactory.DEFAULT_ROWSPEC,
+                        new RowSpec(Sizes.dluY(10)),
+                        FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC
                     }));
 
                 //---- label1 ----
@@ -207,6 +266,27 @@ public class WindowMachineFASettings extends XJDialog {
                 //---- horizontalSpinner ----
                 horizontalSpinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(0), null, new Integer(1)));
                 contentPane.add(horizontalSpinner, cc.xy(5, 17));
+                
+                
+                contentPane.add(goodiesFormsSeparator3, cc.xywh(3, 20, 5, 1));
+                
+              //---- label7 ----
+                label7.setHorizontalAlignment(SwingConstants.RIGHT);
+                label7.setText("X:");
+                contentPane.add(label7, cc.xy(3, 22));
+                contentPane.add(xField, cc.xywh(5, 22, 3, 1));
+
+                //---- label8 ----
+                label8.setHorizontalAlignment(SwingConstants.RIGHT);
+                label8.setText("Y:");
+                contentPane.add(label8, cc.xy(3, 24));
+                contentPane.add(yField, cc.xywh(5, 24, 3, 1));
+                
+                bgButton.setText("BG");
+                contentPane.add(bgButton, cc.xy(3, 26));
+                contentPane.add(label9, cc.xywh(5, 26, 3, 1));
+                
+                
             }
             dialogPane.add(contentPane, BorderLayout.CENTER);
 
@@ -241,7 +321,14 @@ public class WindowMachineFASettings extends XJDialog {
     private JPanel contentPane;
     private JLabel label1;
     private JTextField nameField;
+    private JComponent goodiesFormsSeparator3;
+    private JLabel label7;
+    private JTextField xField;
+    private JLabel label8;
+    private JTextField yField;
+    private JLabel label9;
     private JComponent goodiesFormsSeparator2;
+    
     private JLabel label2;
     private JTextField widthField;
     private JLabel label3;
@@ -254,6 +341,7 @@ public class WindowMachineFASettings extends XJDialog {
     private JPanel buttonBar;
     private JButton okButton;
     private JButton cancelButton;
+    private JButton bgButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
 }

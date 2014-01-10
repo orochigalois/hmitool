@@ -67,10 +67,22 @@ import javax.swing.text.StyleConstants;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.data.DataWrapperAbstract;
 import edu.usfca.vas.data.DataWrapperFA;
 import edu.usfca.vas.debug.DebugWrapper;
+import edu.usfca.vas.graphics.fa.Constant;
 import edu.usfca.vas.graphics.fa.GElementFAMachine;
 import edu.usfca.vas.graphics.fa.GElementFAState;
 import edu.usfca.vas.machine.fa.FAMachine;
@@ -91,114 +103,72 @@ public class WindowFA extends WindowAbstract {
 
     private JTabbedPane tabbedComponent;
     private XJMenu menuTools;
-    public ViewPanel vp=new ViewPanel();
     
-    public class JBackgroundPanel extends JPanel {
-    	  private BufferedImage img;
-    	 
-    	  public JBackgroundPanel() {
-    	    // load the background image
-    	    try {
-    	      img = ImageIO.read(new File("./bg.png"));
-    	    } catch(IOException e) {
-    	      e.printStackTrace();
-    	    }
-    	  }
-    	 
-    	  @Override
-    	  protected void paintComponent(Graphics g) {
-    	    super.paintComponent(g);
-    	    // paint the background image and scale it to fill the entire space
-    	    g.drawImage(img, 0, 0, 876, 328, this);
-    	  }
-    	}
+  
+
+    public AlexSimulatorController simulatorController=new AlexSimulatorController();
+
     
-    public class ViewPanel extends JFrame {
+    public class AlexSimulatorController extends JFrame {
 
     	private JLabel lblImg;
     	private Icon icon;
-
+    	public JPanel btnPanel = new JPanel();
     	/** Constructor to set up the GUI */
-    	public ViewPanel() {
+    	public void createButtons(int i)
+    	{
+    		
+    		//remove all components in panel.
+    		btnPanel.removeAll(); 
+            // refresh the panel.
+ 
+    
+    		btnPanel.setLayout(new java.awt.GridLayout(i, i));
+            for (int j = 0; j < i; j++) {
+                JButton b = new JButton((String) Constant.eventModel.get(j));
+                b.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent e) {
+                    	
+                    	getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForwardByClick(e.getActionCommand());
+        				String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
+        		        if(current!=null)
+        		        {
+	        				Constant.simulatorViewFrame.updateImage(current);
+	        		        displayDebuggerInfo();
+	        		        updateExecutionComponents();
+        		        }
+        		        else
+        		        {
+        		        	XJAlert.display(getJavaContainer(),"Warning","This transition is not correct,SM will reset" );
+    
+        		        }
+        			//	requestFocus(); // change the focus to JFrame to receive
+        								// KeyEvent
+                    }
+                });
+                btnPanel.add(b);
+            }
+            
+            btnPanel.updateUI();
+    	
+    	}
+    	public AlexSimulatorController() {
     		// Set up a panel for the buttons
-    		JBackgroundPanel bgPanel = new JBackgroundPanel();
-    		JPanel btnPanel = new JPanel(new FlowLayout());
+    
     		
-    		JButton btnLeft = new JButton("1");
-    		btnPanel.add(btnLeft);
-    		btnLeft.addActionListener(new ActionListener() {
-    			public void actionPerformed(ActionEvent e) {
-
-    				getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForwardByClick("1");
-    				String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
-    		        vp.updateImage(current);
-    		        displayDebuggerInfo();
-    		        updateExecutionComponents();
-    		        
-    				requestFocus(); // change the focus to JFrame to receive
-    								// KeyEvent
-    			}
-    		});
     		
-    		JButton btnRight = new JButton("2");
-    		btnPanel.add(btnRight);
-    		btnRight.addActionListener(new ActionListener() {
-    			public void actionPerformed(ActionEvent e) {
-
-    				getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForwardByClick("2");
-    				String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
-    		        vp.updateImage(current);
-    		        displayDebuggerInfo();
-    		        updateExecutionComponents();
-    		        
-    				requestFocus(); // change the focus to JFrame to receive
-    								// KeyEvent
-    			}
-    		});
-
+    	
     		
-    		lblImg = new JLabel();
-    		icon = new ImageIcon("trip1.png");
-    		// Add both panels to this JFrame
+    		
     		Container cp = getContentPane();
     		cp.setLayout(new BorderLayout());
+ 
+    		cp.add(btnPanel, BorderLayout.CENTER);
+
+    	
+    		setTitle("KeyPanel");
     		
-    		bgPanel.add(lblImg);
-    		cp.add(bgPanel, BorderLayout.CENTER);
-    		cp.add(btnPanel, BorderLayout.SOUTH);
-    		
-    		bgPanel.setLayout(null);
-    		lblImg.setIcon(icon);
-//    		lblImg.setLocation(27, 20);
-    		lblImg.setBounds(386, 75, 101, 121);
-    		// "this" JFrame fires KeyEvent
-    		addKeyListener(new KeyAdapter() {
-    			@Override
-    			public void keyPressed(KeyEvent evt) {
-    				switch (evt.getKeyCode()) {
-    				case KeyEvent.VK_LEFT:
-
-    					icon = new ImageIcon(
-    							"D://131025HMI_tool//workspace//demo//t1.png");
-
-    					lblImg.setIcon(icon);
-    					break;
-    				case KeyEvent.VK_RIGHT:
-
-    					icon = new ImageIcon(
-    							"D://131025HMI_tool//workspace//demo//t2.png");
-
-    					lblImg.setIcon(icon);
-    					break;
-    				}
-    			}
-    		});
-
-    		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Handle the CLOSE
-    														// button
-    		setTitle("ViewPanel");
-    		
-    		Dimension d = new Dimension(876,390);
+    		Dimension d = new Dimension(300,300);
             setPreferredSize(d);
             setResizable(false);
         
@@ -207,19 +177,32 @@ public class WindowFA extends WindowAbstract {
     		pack(); // pack all the components in the JFrame
     		setVisible(false); // show it
     		requestFocus(); // set the focus to JFrame to receive KeyEvent
+    		
+    		addKeyListener(new KeyAdapter() {
+    			@Override
+    			public void keyPressed(KeyEvent evt) {
+    				switch (evt.getKeyCode()) {
+    				case KeyEvent.VK_LEFT:
+
+    					
+    					break;
+    				case KeyEvent.VK_RIGHT:
+
+//    					icon = new ImageIcon(
+//    							"D://131025HMI_tool//workspace//demo//t2.png");
+//
+//    					lblImg.setIcon(icon);
+    					break;
+    				}
+    			}
+    		});
     	}
 
     	public void setV(boolean V)
     	{
     		setVisible(V);
     	}
-    	public void updateImage(String imgName)
-    	{
-    		icon = new ImageIcon(
-    				"D://131025HMI_tool//workspace//hmitool//"+imgName+".png");
 
-    		lblImg.setIcon(icon);
-    	}
     }
 
     public void awakeConcrete() {
@@ -268,7 +251,7 @@ public class WindowFA extends WindowAbstract {
     public void setWindowMachineTitle(WindowMachineAbstract wm, String title) {
         tabbedComponent.setTitleAt(windowMachines.indexOf(wm), title);
     }
-
+ 
     public String getWindowMachineTitle(WindowMachineAbstract wm) {
         return tabbedComponent.getTitleAt(windowMachines.indexOf(wm));
     }
@@ -421,6 +404,8 @@ public class WindowFA extends WindowAbstract {
     }
 
     public void debug() {
+    	try
+    	{
         String s = getCurrentWindowMachineFA().getString();
         getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugReset(s);
         String t = Localized.getFormattedString("faDebugReady", new Object[] { getDebugString() });
@@ -432,18 +417,33 @@ public class WindowFA extends WindowAbstract {
         displayDebuggerInfo();
         updateExecutionComponents();
         String start=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getStartState();
-        vp.updateImage(start);
-        vp.setV(true);
+        
+        Constant.simulatorViewFrame.updateImage(start);
+        Constant.simulatorViewFrame.setV(true);
+        
+        simulatorController.createButtons(Constant.eventModel.getSize());
+        simulatorController.setV(true);
+    	}
+    	catch(Exception e) {
+                XJAlert.display(getJavaContainer(), "Alert", "This state machine is not correct");
+    	}
     }
 
     public boolean debugStepForward() {
+    	try
+    	{
         getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().debugStepForward();
         
         String current=getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().getCurrentState();
-        vp.updateImage(current);
+        Constant.simulatorViewFrame.updateImage(current);
         displayDebuggerInfo();
         updateExecutionComponents();
+    	}
+    	catch(Exception e) {
+               
+    	}
         return getCurrentWindowMachineFA().getDataWrapperFA().getGraphicMachine().isPaused();
+    	
     }
 
     public String getDebugString() {
@@ -490,7 +490,7 @@ public class WindowFA extends WindowAbstract {
 
         getStandardOutputDevice().println(t, attr);
 
-        getCurrentWindowMachineFA().setDebugInfo(s);
+        //getCurrentWindowMachineFA().setDebugInfo(s);
         getCurrentWindowMachineAbstract().getGraphicPanel().repaint();
     }
 

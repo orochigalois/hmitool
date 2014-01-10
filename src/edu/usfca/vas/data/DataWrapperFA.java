@@ -43,7 +43,7 @@ public class DataWrapperFA extends DataWrapperAbstract implements XJXMLSerializa
     protected GElementFAMachine graphicMachine = null;
     protected String string = "";
 
-    protected Dimension size = new Dimension(1024, 768);
+    protected Dimension size = new Dimension(1500, 1500);
 
     public DataWrapperFA() {
         machine = new FAMachine();

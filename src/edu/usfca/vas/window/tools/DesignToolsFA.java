@@ -31,10 +31,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.usfca.vas.window.tools;
 
+import javax.swing.*;
+
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.graphics.IconManager;
-
-import javax.swing.*;
 
 public class DesignToolsFA extends DesignToolsAbstract {
 
@@ -44,7 +44,7 @@ public class DesignToolsFA extends DesignToolsAbstract {
 
     public DesignToolsFA() {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-
+        createDesignToolSeparator(18);
         mouseButton = createDesignToolButton(IconManager.ICON_ARROW, Localized.getString("faDTSelect"), TOOL_ARROW);
         createDesignToolSeparator(20);
         createDesignToolButton(IconManager.ICON_LINK, Localized.getString("faDTLink"), TOOL_LINK);

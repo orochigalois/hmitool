@@ -31,6 +31,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.usfca.vas.window;
 
+import edu.usfca.vas.VisualAutomataSimulator;
 import edu.usfca.vas.app.Document;
 import edu.usfca.vas.app.Localized;
 import edu.usfca.vas.app.Preferences;
@@ -39,7 +40,6 @@ import edu.usfca.vas.debug.Debugger;
 import edu.usfca.vas.graphics.IconManager;
 import edu.usfca.vas.graphics.device.Console;
 import edu.usfca.vas.graphics.device.OutputDevice;
-import edu.usfca.vas.VisualAutomataSimulator;
 import edu.usfca.xj.appkit.frame.XJWindow;
 import edu.usfca.xj.appkit.gview.object.GElement;
 import edu.usfca.xj.appkit.menu.XJMainMenuBar;
@@ -52,7 +52,6 @@ import edu.usfca.xj.foundation.XJUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -182,13 +181,13 @@ public abstract class WindowAbstract extends XJWindow implements XJMenuItemDeleg
 
         XJMenu menu = new XJMenu();
         menu.setTitle(Localized.getString("waMenuMachine"));
-        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineNew"), KeyEvent.VK_N, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_MACHINE_NEW, this));
-        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineDuplicate"), MI_MACHINE_DUPLICATE, this));
-        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineClose"), KeyEvent.VK_W, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_MACHINE_CLOSE, this));
-        menu.addSeparator();
+//        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineNew"), KeyEvent.VK_N, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_MACHINE_NEW, this));
+//        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineDuplicate"), MI_MACHINE_DUPLICATE, this));
+//        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineClose"), KeyEvent.VK_W, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_MACHINE_CLOSE, this));
+//        menu.addSeparator();
         menu.addItem(new XJMenuItem(Localized.getString("waMIMachineShowMagnet"), KeyEvent.VK_M, MI_SHOW_MAGNETICS, this));
-        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineShowConsole"), IconManager.getIcon(IconManager.ICON_CONSOLE), KeyEvent.VK_J, MI_SHOW_CONSOLE, this));
-        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineShowOverlay"), KeyEvent.VK_O, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_SHOW_OVERLAY, this));
+//        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineShowConsole"), IconManager.getIcon(IconManager.ICON_CONSOLE), KeyEvent.VK_J, MI_SHOW_CONSOLE, this));
+//        menu.addItem(new XJMenuItem(Localized.getString("waMIMachineShowOverlay"), KeyEvent.VK_O, XJMenuItem.getKeyModifier() | InputEvent.ALT_MASK, MI_SHOW_OVERLAY, this));
         menu.addItem(new XJMenuItem(Localized.getString("waMIMachineCenterAll"), MI_CENTER, this));
         menu.addSeparator();
         menu.addItem(new XJMenuItem(Localized.getString("waMIMachineCopyImage"), MI_COPY_BITMAP_IMAGE, this));
@@ -210,11 +209,11 @@ public abstract class WindowAbstract extends XJWindow implements XJMenuItemDeleg
         menuRun.addItem(new XJMenuItem(Localized.getString("waMIRunDebugProceed"), IconManager.getIcon(IconManager.ICON_DEBUG_PROCEED), KeyEvent.VK_P, MI_DEBUG_PROCEED, this));
         menuRun.addItem(new XJMenuItem(Localized.getString("waMIRunDebugOneStep"), IconManager.getIcon(IconManager.ICON_DEBUG_ONE_STEP), KeyEvent.VK_F, MI_DEBUG_FORWARD, this));
 
-        menubar.addCustomMenu(menuRun);
+        //menubar.addCustomMenu(menuRun);
 
         // *** FA or TM menu (implemented by concrete subclass)
 
-        customizeMenuBarForMachine(menubar);
+        //customizeMenuBarForMachine(menubar);
     }
 
 
